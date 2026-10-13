@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0f2a1d">
+<title>Счётчик откликов</title>
+<style>
+:root{--a:#22c55e;--b:#16a34a;--bg1:#06140d;--bg2:#0f2a1d;--card:rgba(255,255,255,.06);--t:#eafff2;--m:#9fd8b5}
+[data-theme=blue]{--a:#38bdf8;--b:#0284c7;--bg1:#06101a;--bg2:#0c2236;--t:#eaf6ff;--m:#9cc9e8}
+[data-theme=purple]{--a:#a78bfa;--b:#7c3aed;--bg1:#0e0818;--bg2:#1f1236;--t:#f3edff;--m:#c4b5fd}
+[data-theme=orange]{--a:#fb923c;--b:#ea580c;--bg1:#170b04;--bg2:#2f1708;--t:#fff3ea;--m:#fdba74}
+[data-theme=pink]{--a:#f472b6;--b:#db2777;--bg1:#18060f;--bg2:#331026;--t:#ffeef7;--m:#f9a8d4}
+[data-theme=light]{--a:#16a34a;--b:#15803d;--bg1:#f0fdf4;--bg2:#dcfce7;--card:rgba(0,0,0,.05);--t:#052e16;--m:#3f7a55}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--t);background:radial-gradient(circle at 50% 0%,var(--bg2),var(--bg1) 70%);display:flex;flex-direction:column;align-items:center;user-select:none;transition:background .4s}
+header{width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;padding:18px 20px}
+h1{font-size:18px;margin:0;font-weight:600;letter-spacing:.3px}
+.ib{background:var(--card);border:1px solid rgba(255,255,255,.1);color:var(--t);width:44px;height:44px;border-radius:14px;font-size:20px;cursor:pointer}
+main{flex:1;width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;padding:0 20px 30px;gap:22px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.st{background:var(--card);border-radius:16px;padding:12px;text-align:center}
+.st b{display:block;font-size:22px}.st span{font-size:12px;color:var(--m)}
+.big{width:min(72vw,300px);aspect-ratio:1;border-radius:50%;border:none;cursor:pointer;color:#fff;background:radial-gradient(circle at 35% 30%,var(--a),var(--b));box-shadow:0 0 0 10px rgba(255,255,255,.04),0 20px 60px -10px var(--a);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .08s}
+.big:active,.big.p{transform:scale(.94)}
+.big .n{font-size:84px;font-weight:800;line-height:1}.big .l{font-size:14px;opacity:.85;margin-top:6px}
+.bar{width:100%;height:10px;background:var(--card);border-radius:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--b),var(--a));transition:width .3s}
+.goal{font-size:13px;color:var(--m);margin-top:-14px}
+.row{display:flex;gap:10px}
+.sb{background:var(--card);color:var(--t);border:1px solid rgba(255,255,255,.1);padding:10px 18px;border-radius:12px;font-size:15px;cursor:pointer}
+.hint{font-size:13px;color:var(--m);text-align:center}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:9}
+.ov.o{display:flex}
+.pn{background:var(--bg2);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px;max-height:88vh;overflow:auto}
+.pn h2{margin:0 0 14px;font-size:18px}
+.it{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08);gap:12px}
+.it small{display:block;color:var(--m);font-size:12px;margin-top:2px}
+.sw{position:relative;width:48px;height:28px;flex:none}.sw input{display:none}
+.sw span{position:absolute;inset:0;background:rgba(255,255,255,.15);border-radius:20px;cursor:pointer;transition:.2s}
+.sw span:after{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.sw input:checked+span{background:var(--a)}.sw input:checked+span:after{left:23px}
+.th{display:flex;gap:10px;flex-wrap:wrap;padding:12px 0}
+.th button{width:40px;height:40px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.th button.s{border-color:var(--t)}
+input[type=number]{width:80px;background:var(--card);color:var(--t);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;font-size:15px}
+.danger{background:#dc2626;color:#fff;border:none}
+.hist{font-size:14px;color:var(--m);margin-top:10px}
+</style>
+</head>
+<body>
+<header><h1>📨 Отклики на вакансии</h1><button class="ib" id="ob" aria-label="Настройки">⚙️</button></header>
+<main>
+<div class="stats"><div class="st"><b id="sw">0</b><span>за неделю</span></div><div class="st"><b id="sa">0</b><span>всего</span></div><div class="st"><b id="ss">0</b><span>дней подряд</span></div></div>
+<button class="big" id="btn"><span class="n" id="cnt">0</span><span class="l">сегодня · нажми</span></button>
+<div class="bar"><i id="pr"></i></div><div class="goal" id="gl"></div>
+<div class="row"><button class="sb" id="mn">− Отменить</button></div>
+<div class="hint" id="ht">Пробел — +1 отклик · Backspace — отменить</div>
+</main>
+<div class="ov" id="ov"><div class="pn">
+<h2>Настройки</h2>
+<div class="it"><div>Кнопки громкости<small>Громкость + / − меняет счётчик (работает не во всех мобильных браузерах)</small></div><label class="sw"><input type="checkbox" id="ovol"><span></span></label></div>
+<div class="it"><div>Вибрация<small>Отклик при нажатии на телефоне</small></div><label class="sw"><input type="checkbox" id="ovib"><span></span></label></div>
+<div class="it"><div>Звук<small>Короткий щелчок при отклике</small></div><label class="sw"><input type="checkbox" id="osnd"><span></span></label></div>
+<div class="it"><div>Цель на день</div><input type="number" id="ogoal" min="0" max="999"></div>
+<div style="padding-top:12px">Цвет оформления</div>
+<div class="th" id="th"></div>
+<div class="hist" id="hs"></div>
+<div class="it" style="border:none"><button class="sb danger" id="rt">Сбросить сегодня</button><button class="sb danger" id="ra">Сбросить всё</button></div>
+<button class="sb" id="cb" style="width:100%;margin-top:8px">Готово</button>
+</div></div>
+<script>
+const K='otkliki_v1',T={green:'#22c55e',blue:'#38bdf8',purple:'#a78bfa',orange:'#fb923c',pink:'#f472b6',light:'#dcfce7'};
+let s=JSON.parse(localStorage.getItem(K)||'null')||{d:{},o:{vol:true,vib:true,snd:false,goal:20,theme:'green'}};
+const $=i=>document.getElementById(i),day=(o=0)=>{const d=new Date();d.setDate(d.getDate()-o);return d.toLocaleDateString('sv')};
+const save=()=>localStorage.setItem(K,JSON.stringify(s));
+let ac;function click(){if(!s.o.snd)return;ac=ac||new AudioContext();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.12);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.12)}
+function render(){const t=s.d[day()]||0;$('cnt').textContent=t;let w=0;for(let i=0;i<7;i++)w+=s.d[day(i)]||0;$('sw').textContent=w;$('sa').textContent=Object.values(s.d).reduce((a,b)=>a+b,0);let k=0,i=t?0:1;while(s.d[day(i)])k++,i++;$('ss').textContent=k;const g=+s.o.goal;$('pr').style.width=g?Math.min(100,t/g*100)+'%':'0';$('gl').textContent=g?`Цель: ${t} / ${g}${t>=g?' 🎉':''}`:'';document.body.dataset.theme=s.o.theme;
+$('hs').innerHTML='Последние 7 дней: '+[...Array(7)].map((_,i)=>`${day(i).slice(5)}: <b>${s.d[day(i)]||0}</b>`).join(' · ')}
+function add(n){const d=day();s.d[d]=Math.max(0,(s.d[d]||0)+n);if(!s.d[d])delete s.d[d];save();render();if(n>0){click();if(s.o.vib&&navigator.vibrate)navigator.vibrate(30);const b=$('btn');b.classList.add('p');setTimeout(()=>b.classList.remove('p'),90)}}
+$('btn').onclick=()=>add(1);$('mn').onclick=()=>add(-1);
+document.addEventListener('keydown',e=>{if($('ov').classList.contains('o'))return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)add(1)}else if(e.code==='Backspace'){e.preventDefault();add(-1)}else if(s.o.vol&&(e.key==='AudioVolumeUp'||e.key==='VolumeUp')){e.preventDefault();add(1)}else if(s.o.vol&&(e.key==='AudioVolumeDown'||e.key==='VolumeDown')){e.preventDefault();add(-1)}});
+document.addEventListener('keyup',e=>{if(e.code==='Space')e.preventDefault()});
+const bind=(id,k)=>{$(id).checked=s.o[k];$(id).onchange=e=>{s.o[k]=e.target.checked;save()}};bind('ovol','vol');bind('ovib','vib');bind('osnd','snd');
+$('ogoal').value=s.o.goal;$('ogoal').oninput=e=>{s.o.goal=+e.target.value||0;save();render()};
+Object.entries(T).forEach(([n,c])=>{const b=document.createElement('button');b.style.background=c;b.title=n;b.onclick=()=>{s.o.theme=n;save();render();mark()};$('th').append(b)});
+const mark=()=>[...$('th').children].forEach(b=>b.classList.toggle('s',b.title===s.o.theme));mark();
+$('ob').onclick=()=>{render();$('ov').classList.add('o')};$('cb').onclick=()=>$('ov').classList.remove('o');$('ov').onclick=e=>{if(e.target.id==='ov')$('ov').classList.remove('o')};
+$('rt').onclick=()=>{if(confirm('Сбросить счётчик за сегодня?')){delete s.d[day()];save();render()}};
+$('ra').onclick=()=>{if(confirm('Удалить всю историю?')){s.d={};save();render()}};
+if(matchMedia('(pointer:coarse)').matches)$('ht').textContent='Нажимай большую кнопку после каждого отклика';
+render();setInterval(render,60000);
+</script>
+</body>
+</html>
