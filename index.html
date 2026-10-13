@@ -121,7 +121,7 @@ input[type=number]{width:80px;background:var(--card);color:var(--t);border:1px s
 </div></div>
 <script>
 const K='otkliki_v1',T={green:'#22c55e',blue:'#38bdf8',purple:'#a78bfa',orange:'#fb923c',pink:'#f472b6',teal:'#2dd4bf',red:'#f87171',gold:'#facc15',light:'#dcfce7'};
-let s=JSON.parse(localStorage.getItem(K)||'null')||{d:{},o:{vol:true,vib:true,snd:false,goal:20,theme:'green',style:'classic',cf:true}};
+let s=JSON.parse(localStorage.getItem(K)||'null')||{d:{},o:{vol:true,vib:true,snd:false,goal:20,theme:'green',style:'retro',cf:true}};
 const $=i=>document.getElementById(i),day=(o=0)=>{const d=new Date();d.setDate(d.getDate()-o);return d.toLocaleDateString('sv')};
 const save=()=>localStorage.setItem(K,JSON.stringify(s));
 let ac;function click(){if(!s.o.snd)return;ac=ac||new AudioContext();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.12);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.12)}
@@ -140,7 +140,7 @@ $('rt').onclick=()=>{if(confirm('Сбросить счётчик за сегод
 $('ra').onclick=()=>{if(confirm('Удалить всю историю?')){s.d={};save();render()}};
 if(matchMedia('(pointer:coarse)').matches)$('ht').textContent='Нажимай большую кнопку после каждого отклика';
 
-s.o.style=s.o.style||'classic';if(s.o.cf===undefined)s.o.cf=true;bind('ocf','cf');
+if(!s.o.r1){s.o.style='retro';s.o.r1=1;save()}if(s.o.cf===undefined)s.o.cf=true;bind('ocf','cf');
 const ST={classic:'Классика',glass:'Стекло',neon:'Неон',minimal:'Минимализм',retro:'Ретро',nature:'Природа'};
 Object.entries(ST).forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;b.dataset.k=k;b.onclick=()=>{s.o.style=k;save();render();marks()};$('sy').append(b)});
 const marks=()=>[...$('sy').children].forEach(b=>b.classList.toggle('s',b.dataset.k===s.o.style));marks();
