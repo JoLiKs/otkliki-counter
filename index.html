@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0f2a1d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Отклики">
+<link rel="apple-touch-icon" href="icon.png"><link rel="icon" href="icon.png"><link rel="manifest" href="manifest.json">
 <title>Счётчик откликов</title>
 <style>
 :root{--a:#22c55e;--b:#16a34a;--bg1:#06140d;--bg2:#0f2a1d;--card:rgba(255,255,255,.06);--t:#eafff2;--m:#9fd8b5}
@@ -116,6 +121,8 @@ input[type=number]{width:80px;background:var(--card);color:var(--t);border:1px s
 <div style="padding-top:12px">Цвет оформления</div>
 <div class="th" id="th"></div>
 <div class="hist" id="hs"></div>
+<div class="it"><div>Виджет на экран Домой<small>Добавить счётчик иконкой на iPhone</small></div><button class="sb" id="wg">📲 Добавить</button></div>
+<div id="wgi" style="display:none;padding:10px 0;font-size:14px;line-height:1.5"></div>
 <div class="it" style="border:none"><button class="sb danger" id="rt">Сбросить сегодня</button><button class="sb danger" id="ra">Сбросить всё</button></div>
 <button class="sb" id="cb" style="width:100%;margin-top:8px">Готово</button>
 </div></div>
@@ -149,6 +156,15 @@ function confetti(){const c=getComputedStyle(document.body);const cols=[c.getPro
 function leaves(){const l=$('lv');if(s.o.style!=='nature'){l.innerHTML='';return}if(l.children.length)return;for(let i=0;i<10;i++){const e=document.createElement('div');e.className='leaf';e.textContent=['🍃','🌿','🍀'][i%3];e.style.left=Math.random()*100+'vw';e.style.animationDuration=9+Math.random()*10+'s';e.style.animationDelay=-Math.random()*15+'s';l.append(e)}}
 render();
 setInterval(render,60000);
+</script>
+<script>
+document.getElementById('wg').onclick=async()=>{const b=document.getElementById('wgi');
+if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){b.innerHTML='✅ Счётчик уже добавлен на экран Домой.';}
+else if(window._bip){window._bip.prompt();return}
+else if(/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)&&'ontouchend' in document){b.innerHTML='1. Откройте сайт в Safari.<br>2. Нажмите «Поделиться» <b>⬆️</b> внизу экрана.<br>3. Выберите «На экран „Домой“».<br>4. Нажмите «Добавить».<br>Иконка «Отклики» появится рядом с приложениями и будет открываться на весь экран.';}
+else b.innerHTML='Откройте меню браузера (⋮) и выберите «Добавить на главный экран» или «Установить приложение».';
+b.style.display=b.style.display=='block'?'none':'block'};
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();window._bip=e});
 </script>
 </body>
 </html>
