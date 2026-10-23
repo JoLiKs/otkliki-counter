@@ -123,7 +123,7 @@ input[type=number]{width:80px;background:var(--card);color:var(--t);border:1px s
 <div class="hist" id="hs"></div>
 <div class="it"><div>Виджет на экран Домой<small>Добавить счётчик иконкой на iPhone</small></div><button class="sb" id="wg">📲 Добавить</button></div>
 <div id="wgi" style="display:none;padding:10px 0;font-size:14px;line-height:1.5"></div>
-<div class="it" style="border:none"><button class="sb danger" id="rt">Сбросить сегодня</button><button class="sb danger" id="ra">Сбросить всё</button></div>
+<div class="it" style="border:none"><button class="sb danger" id="rt">Сбросить сегодня</button><button class="sb danger" id="rw">Сбросить неделю</button><button class="sb danger" id="ra">Сбросить всё</button></div>
 <button class="sb" id="cb" style="width:100%;margin-top:8px">Готово</button>
 </div></div>
 <script>
@@ -132,7 +132,7 @@ let s=JSON.parse(localStorage.getItem(K)||'null')||{d:{},o:{vol:true,vib:true,sn
 const $=i=>document.getElementById(i),day=(o=0)=>{const d=new Date();d.setDate(d.getDate()-o);return d.toLocaleDateString('sv')};
 const save=()=>localStorage.setItem(K,JSON.stringify(s));
 let ac;function click(){if(!s.o.snd)return;ac=ac||new AudioContext();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.12);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.12)}
-function render(){const t=s.d[day()]||0;$('cnt').textContent=t;let w=0;for(let i=0;i<7;i++)w+=s.d[day(i)]||0;$('sw').textContent=w;$('sa').textContent=Object.values(s.d).reduce((a,b)=>a+b,0);let k=0,i=t?0:1;while(s.d[day(i)])k++,i++;$('ss').textContent=k;const g=+s.o.goal;$('pr').style.width=g?Math.min(100,t/g*100)+'%':'0';$('gl').textContent=g?`Цель: ${t} / ${g}${t>=g?' 🎉':''}`:'';document.body.dataset.theme=s.o.theme;document.documentElement.dataset.style=document.body.dataset.style=s.o.style;leaves();
+function render(){const t=s.d[day()]||0;$('cnt').textContent=t;if(s.wr&&s.wr.d===day()&&t<s.wr.b){s.wr.b=t;save()}let w=0;for(let i=0;i<7;i++){const k=day(i);if(s.wr&&k<s.wr.d)continue;w+=(s.d[k]||0)-(s.wr&&k===s.wr.d?s.wr.b:0)}w=Math.max(0,w);$('sw').textContent=w;$('sa').textContent=Object.values(s.d).reduce((a,b)=>a+b,0);let k=0,i=t?0:1;while(s.d[day(i)])k++,i++;$('ss').textContent=k;const g=+s.o.goal;$('pr').style.width=g?Math.min(100,t/g*100)+'%':'0';$('gl').textContent=g?`Цель: ${t} / ${g}${t>=g?' 🎉':''}`:'';document.body.dataset.theme=s.o.theme;document.documentElement.dataset.style=document.body.dataset.style=s.o.style;leaves();
 $('hs').innerHTML='Последние 7 дней: '+[...Array(7)].map((_,i)=>`${day(i).slice(5)}: <b>${s.d[day(i)]||0}</b>`).join(' · ')}
 function add(n){const d=day();s.d[d]=Math.max(0,(s.d[d]||0)+n);if(!s.d[d])delete s.d[d];save();render();if(n>0){click();if(s.o.vib&&navigator.vibrate)navigator.vibrate(30);const b=$('btn');pop(b);const t=s.d[day()];if(s.o.cf&&(t%10===0||t===+s.o.goal))confetti();b.classList.add('p');setTimeout(()=>b.classList.remove('p'),90)}}
 $('btn').onclick=()=>add(1);$('mn').onclick=()=>add(-1);
@@ -143,6 +143,7 @@ $('ogoal').value=s.o.goal;$('ogoal').oninput=e=>{s.o.goal=+e.target.value||0;sav
 Object.entries(T).forEach(([n,c])=>{const b=document.createElement('button');b.style.background=c;b.title=n;b.onclick=()=>{s.o.theme=n;save();render();mark()};$('th').append(b)});
 const mark=()=>[...$('th').children].forEach(b=>b.classList.toggle('s',b.title===s.o.theme));mark();
 $('ob').onclick=()=>{render();$('ov').classList.add('o')};$('cb').onclick=()=>$('ov').classList.remove('o');$('ov').onclick=e=>{if(e.target.id==='ov')$('ov').classList.remove('o')};
+$('rw').onclick=()=>{if(confirm('Сбросить счётчик за неделю? Отклики по дням и «всего» сохранятся.')){s.wr={d:day(),b:s.d[day()]||0};save();render()}};
 $('rt').onclick=()=>{if(confirm('Сбросить счётчик за сегодня?')){delete s.d[day()];save();render()}};
 $('ra').onclick=()=>{if(confirm('Удалить всю историю?')){s.d={};save();render()}};
 if(matchMedia('(pointer:coarse)').matches)$('ht').textContent='Нажимай большую кнопку после каждого отклика';
